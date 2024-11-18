@@ -3,7 +3,7 @@ import {
   useFeedbackByIdProduct,
   useProductItemById,
 } from "@/pages/admin-page/product.loader";
-import { useAddToCart, useProducts } from "@/pages/app.loader";
+import { useAddToCart, useCreateOrder, useProducts } from "@/pages/app.loader";
 import {
   EyeOutlined,
   MenuUnfoldOutlined,
@@ -23,10 +23,11 @@ import {
   Modal,
   Button,
   Rate,
+  message,
 } from "antd";
 import MenuItem from "antd/es/menu/MenuItem";
-import React, { useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 const { Option } = Select;
 function getItem(
   label: React.ReactNode,
@@ -72,14 +73,36 @@ export const ListSanPham = () => {
   const [idProduct, setIdProduct] = useState(1);
 
   const { mutate } = useAddToCart();
-  const { data: dataProduct } = useProductItemById({ id: idProduct });
+  const { mutate: createOrder } = useCreateOrder();
+
+  const { data: dataProduct, isLoading: isLoadingProduct } = useProductItemById(
+    { id: idProduct }
+  );
   const { data: dataFeedback } = useFeedbackByIdProduct({ id: idProduct });
 
   const params = new URLSearchParams(window.location.search);
   const optionValue = params.get("option");
   const location = items.findIndex((item: any) => item?.label === optionValue);
   const content = <span>Add to card</span>;
+  const navigate = useNavigate();
 
+  useEffect(() => {
+    navigate("/sanpham");
+    const status = params.get("status");
+    if (status === "success") {
+      var order = JSON.parse(sessionStorage.getItem("order") || "{}");
+      if (Object.keys(order).length === 0) {
+        message.error("Lỗi tạo đơn hàng");
+      } else {
+        createOrder(order);
+      }
+    } else if (status === "fail") {
+      message.error("Thanh toán thất bại");
+    }
+  }, []);
+  const formatPrice = (price: any) => {
+    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  };
   return (
     <>
       <div className="products">
@@ -173,7 +196,7 @@ export const ListSanPham = () => {
                           <Row justify="center" className="color-borrow font">
                             {item.summary}
                           </Row>
-                          <Row justify="center">${item.price}</Row>
+                          <Row justify="center">₫{formatPrice(item.price)}</Row>
                         </div>
                       </Col>
                     );
@@ -196,7 +219,7 @@ export const ListSanPham = () => {
           </Col>
         </Row>
       </div>
-      {showInforProduct && (
+      {showInforProduct && !isLoadingProduct && (
         <Modal
           title={"Product information"}
           visible={showInforProduct}
@@ -218,7 +241,7 @@ export const ListSanPham = () => {
                 {dataProduct?.name + " - " + dataProduct?.summary}
               </Row>
               <Row style={{ fontSize: 30, color: "orange" }}>
-                ${dataProduct?.price}
+                ₫{formatPrice(dataProduct?.price)}
               </Row>
               <Row>
                 <Col>Mô tả: {dataProduct?.spec}</Col>
@@ -239,7 +262,7 @@ export const ListSanPham = () => {
                 <Col>Series: {dataProduct?.series}</Col>
               </Row>
               <Row>
-                <Col>Tồn kho: {dataProduct?.inStock}</Col>
+                <Col>Còn lại: {dataProduct?.inStock}</Col>
               </Row>
               <Row justify={"center"}>
                 <Col>

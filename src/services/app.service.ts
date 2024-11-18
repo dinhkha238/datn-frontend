@@ -56,6 +56,10 @@ export const getAllPayments = async () => {
   const result = await apiClient.get("/get-all-payments");
   return result.data;
 };
+export const getCheckOrderExist = async (id: any) => {
+  const result = await apiClient.get(`/check-order-exist/${id}`);
+  return result.data;
+};
 
 //post
 export const checkLogin = async (data: any) => {
@@ -72,6 +76,10 @@ export const addProduct = async (data: any) => {
 };
 export const createOrder = async (data: any) => {
   const result = await apiClient.post("/create-order", data);
+  return result.data;
+};
+export const createPayment = async (data: any) => {
+  const result = await apiClient.post("/vnpay_payment", data);
   return result.data;
 };
 

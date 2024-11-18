@@ -17,10 +17,13 @@ export const Order = () => {
     month_year: isTime,
   });
   const [idOrder, setIdOrder] = useState("");
-  const { data: dataOrderById } = useOrderById({
+  const { data: dataOrderById, isLoading: isLoadingOrderById } = useOrderById({
     id: idOrder,
   });
   const { mutate: mutateAcceptOrder } = useAcceptOrder();
+  const formatPrice = (price: any) => {
+    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  };
 
   const columns = [
     {
@@ -35,7 +38,7 @@ export const Order = () => {
       title: "Tổng tiền",
       dataIndex: "totalOrder",
       render: (total: any) => {
-        return <div>${total}</div>;
+        return <div>₫{formatPrice(total)}</div>;
       },
     },
     {
@@ -97,7 +100,7 @@ export const Order = () => {
         </Col>
       </Row>
       <Table dataSource={dataOrder} columns={columns} />;
-      {isModalVisible && (
+      {isModalVisible && !isLoadingOrderById && (
         <Modal
           title="Chi tiết đơn hàng"
           visible={isModalVisible}
@@ -149,7 +152,10 @@ export const Order = () => {
                     </Col>
                     <Col span={6}>
                       <Row justify={"end"}>
-                        {"$" + item?.price + " x " + item?.quantity}
+                        {"₫" +
+                          formatPrice(item?.price) +
+                          " x " +
+                          formatPrice(item?.quantity)}
                       </Row>
                     </Col>
                   </Row>
@@ -161,29 +167,37 @@ export const Order = () => {
             <Col span={8}>Tổng tiền hàng</Col>
             <Col span={16}>
               <Row justify={"end"}>
-                $
-                {dataOrderById?.totalOrder +
-                  dataOrderById?.voucher?.value -
-                  dataOrderById?.shipment?.fees}
+                ₫
+                {formatPrice(
+                  dataOrderById?.totalOrder +
+                    dataOrderById?.voucher?.value -
+                    dataOrderById?.shipment?.fees
+                )}
               </Row>
             </Col>
           </Row>
           <Row>
             <Col span={8}>Phí vận chuyển</Col>
             <Col span={16}>
-              <Row justify={"end"}>${dataOrderById?.shipment?.fees}</Row>
+              <Row justify={"end"}>
+                ₫{formatPrice(dataOrderById?.shipment?.fees)}
+              </Row>
             </Col>
           </Row>
           <Row>
             <Col span={8}>Voucher</Col>
             <Col span={16}>
-              <Row justify={"end"}>-${dataOrderById?.voucher?.value}</Row>
+              <Row justify={"end"}>
+                -₫{formatPrice(dataOrderById?.voucher?.value)}
+              </Row>
             </Col>
           </Row>
           <Row>
             <Col span={8}>Thành tiền</Col>
             <Col span={16}>
-              <Row justify={"end"}>${dataOrderById?.totalOrder}</Row>
+              <Row justify={"end"}>
+                ₫{formatPrice(dataOrderById?.totalOrder)}
+              </Row>
             </Col>
           </Row>
           <Row>

@@ -3,13 +3,13 @@ import {
   useAllShipments,
   useAllVouchers,
   useCreateOrder,
-  useDeleteAllToCart,
 } from "@/pages/app.loader";
 import { Button, Col, Input, Row, Image, Select, message } from "antd";
 import "../components/check-out.css";
 import TextArea from "antd/es/input/TextArea";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { createPayment, getCheckOrderExist } from "@/services/app.service";
 
 interface Shipping {
   id: string;
@@ -28,7 +28,6 @@ export const CheckOut = () => {
   const { data: dataShipments } = useAllShipments();
   const { data: dataVouchers } = useAllVouchers();
   const { data: dataPayments } = useAllPayments();
-  const { mutate: deleteAllCart } = useDeleteAllToCart();
   const [inputAddress, setInputAddress] = useState("");
   const [inputPhone, setInputPhone] = useState("");
   const [inputNote, setInputNote] = useState("");
@@ -61,15 +60,27 @@ export const CheckOut = () => {
   const handleChangeShip = (value: string) => {
     const foundElement = dataShipments?.find((item: any) => item.id === value);
     setFeeShip(foundElement);
-    console.log(foundElement);
   };
   const handleChangeVoucher = (value: string) => {
     const foundElement = dataVouchers?.find((item: any) => item.id === value);
-    console.log(foundElement);
     setVoucher(foundElement);
   };
   const handleChangeTypePayment = (value: any) => {
     setTypePayment(value);
+  };
+  const handlePayment = async (orderId: any, amount: any) => {
+    try {
+      const response = await createPayment({
+        order_id: orderId,
+        amount: amount * 100,
+      });
+      window.location.href = response.payment_url;
+    } catch (error) {
+      console.error("Payment error:", error);
+    }
+  };
+  const formatPrice = (price: any) => {
+    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   };
 
   return (
@@ -137,7 +148,7 @@ export const CheckOut = () => {
                   <Col span={4} style={{ paddingTop: 40 }} pull={1}>
                     <Row justify={"end"} style={{ paddingTop: 10 }}>
                       <h3 style={{ color: "#edb932" }}>
-                        ${item.price * item.quantity}
+                        ₫{formatPrice(item.price * item.quantity)}
                       </h3>{" "}
                     </Row>
                   </Col>
@@ -150,11 +161,12 @@ export const CheckOut = () => {
               </Col>
               <Col pull={1}>
                 <h3>
-                  $
-                  {dataMyCart
-                    ?.map((item: any) => item.price * item.quantity)
-                    .reduce((a: any, b: any) => a + b, 0)
-                    .toFixed(2)}
+                  ₫
+                  {formatPrice(
+                    dataMyCart
+                      ?.map((item: any) => item.price * item.quantity)
+                      .reduce((a: any, b: any) => a + b, 0)
+                  )}
                 </h3>
               </Col>
             </Row>
@@ -198,7 +210,7 @@ export const CheckOut = () => {
                 options={dataVouchers?.map((item: any) => {
                   return {
                     value: item.id,
-                    label: item.name + " - $" + item.value,
+                    label: item.name + " - ₫" + item.value,
                   };
                 })}
               />
@@ -235,7 +247,7 @@ export const CheckOut = () => {
             Total bill
           </Col>
           <Col span={5} pull={3}>
-            <Row justify={"end"}>${totalMyCart.toFixed(2)}</Row>
+            <Row justify={"end"}>₫{formatPrice(totalMyCart)}</Row>
           </Col>
         </Row>
         <Row justify={"space-between"}>
@@ -243,7 +255,7 @@ export const CheckOut = () => {
             Total shipping fee
           </Col>
           <Col span={5} pull={3}>
-            <Row justify={"end"}>${feeShip?.fees.toFixed(2)}</Row>
+            <Row justify={"end"}>₫{formatPrice(feeShip?.fees)}</Row>
           </Col>
         </Row>
         <Row justify={"space-between"}>
@@ -251,7 +263,7 @@ export const CheckOut = () => {
             Discount on voucher
           </Col>
           <Col span={5} pull={3}>
-            <Row justify={"end"}>-${voucher?.value.toFixed(2)}</Row>
+            <Row justify={"end"}>-₫{formatPrice(voucher?.value)}</Row>
           </Col>
         </Row>
         <Row justify={"space-between"}>
@@ -261,7 +273,7 @@ export const CheckOut = () => {
           <Col span={5} pull={3}>
             <Row justify={"end"}>
               <h2>
-                ${(feeShip?.fees - voucher?.value + totalMyCart).toFixed(2)}
+                ₫{formatPrice(feeShip?.fees - voucher?.value + totalMyCart)}
               </h2>
             </Row>
           </Col>
@@ -295,7 +307,18 @@ export const CheckOut = () => {
     const day = String(date.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
   }
-  function info() {
+  function generateRandomId(length = 18) {
+    const characters =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let result = "";
+    const charactersLength = characters.length;
+    for (let i = 0; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+  }
+
+  async function info() {
     if (inputAddress === "") {
       message.error("Please enter your address");
     } else if (inputPhone === "") {
@@ -307,7 +330,13 @@ export const CheckOut = () => {
     } else if (typePayment === "") {
       message.error("Please select a payment type");
     } else {
+      var orderId = generateRandomId();
+
+      while (await getCheckOrderExist(orderId)) {
+        orderId = generateRandomId();
+      }
       const order = {
+        orderId: orderId, // Tạo ID ngẫu nhiên
         paymentId: typePayment,
         shipmentId: feeShip?.id,
         voucherId: voucher?.id,
@@ -315,9 +344,14 @@ export const CheckOut = () => {
         shipAdress: inputAddress,
         phone: inputPhone,
       };
-      createOrder(order);
-      deleteAllCart();
-      navigate("/sanpham");
+      if (typePayment == "1") {
+        sessionStorage.setItem("order", JSON.stringify(order));
+        var amount = feeShip?.fees - voucher?.value + totalMyCart;
+        handlePayment(orderId, amount);
+      } else {
+        createOrder(order);
+        navigate("/sanpham");
+      }
     }
   }
 };

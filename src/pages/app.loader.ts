@@ -110,7 +110,7 @@ export const useUpdateUser = () => {
     },
     {
       onSuccess: () => {
-        queryClient.invalidateQueries(CACHE_KEYS.InforCustomers);
+        queryClient.invalidateQueries(CACHE_KEYS.InforCustomer);
         message.success("Update user success");
       },
       onError: () => {

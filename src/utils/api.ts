@@ -1,16 +1,16 @@
 import { BASE_URL } from "@/constants/config";
 import axios from "axios";
 
-export const apiClient =  axios.create({
+export const apiClient = axios.create({
   baseURL: BASE_URL,
   timeout: 60000,
   headers: {
     "ngrok-skip-browser-warning": "any",
-  }
+  },
 });
 apiClient.interceptors.request.use(
   (config) => {
-    const jwtToken = localStorage.getItem('jwtToken');
+    const jwtToken = localStorage.getItem("jwtToken");
     if (jwtToken) {
       config.headers.Authorization = `Bearer ${jwtToken}`;
     }
@@ -24,18 +24,16 @@ apiClient.interceptors.response.use(
   (response) => {
     const jwtToken = response.data.token;
     if (jwtToken) {
-      localStorage.setItem('jwtToken', jwtToken);
+      localStorage.setItem("jwtToken", jwtToken);
     }
-    
+
     return response;
   },
   (error) => {
-    localStorage.setItem('token', 'false');
+    localStorage.setItem("token", "false");
     return Promise.reject(error);
   }
 );
-
-
 
 export const filterEmptyString = (params: Record<string, any>) => {
   const result: Record<string, any> = {};

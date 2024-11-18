@@ -19,7 +19,9 @@ export const TrangChu = () => {
   const navigate = useNavigate();
   const { mutate } = useAddToCart();
   const content = <span>Add to card</span>;
-
+  const formatPrice = (price: any) => {
+    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  };
   return (
     <div className="trang-chu">
       <div className="img-home"></div>
@@ -88,7 +90,7 @@ export const TrangChu = () => {
                   <Row justify="center" className="color-borrow font">
                     {item.color}
                   </Row>
-                  <Row justify="center">${item.price}</Row>
+                  <Row justify="center">₫{formatPrice(item.price)}</Row>
                 </div>
               </Col>
             );
@@ -185,7 +187,7 @@ export const TrangChu = () => {
                   <Row justify="center" className="color-borrow font">
                     {item.color}
                   </Row>
-                  <Row justify="center">${item.price}</Row>
+                  <Row justify="center">₫{formatPrice(item.price)}</Row>
                 </div>
               </Col>
             );
@@ -217,7 +219,7 @@ export const TrangChu = () => {
                   <Row justify="center" className="color-borrow font">
                     {item.color}
                   </Row>
-                  <Row justify="center">${item.price}</Row>
+                  <Row justify="center">₫{formatPrice(item.price)}</Row>
                 </div>
               </Col>
             );

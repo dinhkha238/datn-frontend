@@ -12,6 +12,9 @@ export const Room = () => {
   const { mutate } = useAddToCart();
   const content = <span>Add to card</span>;
   const navigate = useNavigate();
+  const formatPrice = (price: any) => {
+    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  };
 
   return (
     <div className="room-page">
@@ -95,7 +98,7 @@ export const Room = () => {
                     <Row justify="center" className="color-borrow font">
                       {item.color}
                     </Row>
-                    <Row justify="center">${item.price}</Row>
+                    <Row justify="center">₫{formatPrice(item.price)}</Row>
                   </div>
                 </Col>
               );
@@ -172,7 +175,7 @@ export const Room = () => {
                     <Row justify="center" className="color-borrow font">
                       {item.color}
                     </Row>
-                    <Row justify="center">${item.price}</Row>
+                    <Row justify="center">₫{formatPrice(item.price)}</Row>
                   </div>
                 </Col>
               );
@@ -249,7 +252,7 @@ export const Room = () => {
                     <Row justify="center" className="color-borrow font">
                       {item.color}
                     </Row>
-                    <Row justify="center">${item.price}</Row>
+                    <Row justify="center">₫{formatPrice(item.price)}</Row>
                   </div>
                 </Col>
               );
@@ -326,7 +329,7 @@ export const Room = () => {
                     <Row justify="center" className="color-borrow font">
                       {item.color}
                     </Row>
-                    <Row justify="center">${item.price}</Row>
+                    <Row justify="center">₫{formatPrice(item.price)}</Row>
                   </div>
                 </Col>
               );

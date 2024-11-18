@@ -22,6 +22,9 @@ export const Cart = () => {
   const { data: dataOrderById } = useCartById({
     id: idOrder,
   });
+  const formatPrice = (price: any) => {
+    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  };
   const columns = [
     {
       title: "ID",
@@ -39,7 +42,7 @@ export const Cart = () => {
       title: "Tổng tiền",
       dataIndex: "totalCart",
       render: (total: any) => {
-        return <div>${total}</div>;
+        return <div>₫{formatPrice(total)}</div>;
       },
     },
     {
@@ -106,8 +109,10 @@ export const Cart = () => {
                   </Col>
                   <Col span={16}>
                     <Row>{item?.name}</Row>
-                    <Row justify={"end"}>{"x" + item?.quantity}</Row>
-                    <Row justify={"end"}>{"$" + item?.price}</Row>
+                    <Row justify={"end"}>
+                      {"x" + formatPrice(item?.quantity)}
+                    </Row>
+                    <Row justify={"end"}>{"₫" + formatPrice(item?.price)}</Row>
                   </Col>
                 </Row>
               );
@@ -117,7 +122,7 @@ export const Cart = () => {
         <Row>
           <Col span={8}>Thành tiền</Col>
           <Col span={16}>
-            <Row justify={"end"}>${totalCart}</Row>
+            <Row justify={"end"}>₫{formatPrice(totalCart)}</Row>
           </Col>
         </Row>
       </Modal>

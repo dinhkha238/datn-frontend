@@ -35,7 +35,7 @@ export const AppHeader: React.FC = () => {
     setOpen(true);
   };
   const { data: dataUser, isLoading } = useCustomer();
-  const { data: dataMyCart } = useMyCarts();
+  const { data: dataMyCart, isLoading: isLoadingMyCart } = useMyCarts();
   localStorage.setItem("dataMyCart", JSON.stringify(dataMyCart));
   const onClose = () => {
     setOpen(false);
@@ -78,6 +78,9 @@ export const AppHeader: React.FC = () => {
       );
     }
     return Promise.resolve();
+  };
+  const formatPrice = (price: any) => {
+    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   };
   return (
     <>
@@ -142,32 +145,35 @@ export const AppHeader: React.FC = () => {
       <Drawer
         title="Shopping Cart"
         footer={
-          <Col style={{ padding: 15 }}>
-            <Row justify={"space-between"}>
-              {dataMyCart?.length > 0 && (
-                <Col style={{ paddingTop: 13 }}>
-                  <Button
-                    className="button"
-                    onClick={() => handleClick("/check-out")}
-                  >
-                    CHECK OUT
-                  </Button>
+          !isLoadingMyCart && (
+            <Col style={{ padding: 15 }}>
+              <Row justify={"space-between"}>
+                {dataMyCart?.length > 0 && (
+                  <Col style={{ paddingTop: 13 }}>
+                    <Button
+                      className="button"
+                      onClick={() => handleClick("/check-out")}
+                    >
+                      CHECK OUT
+                    </Button>
+                  </Col>
+                )}
+                <Col>
+                  <h3>
+                    Subtotal:{" "}
+                    <span style={{ color: "#edb932" }}>
+                      ₫
+                      {formatPrice(
+                        dataMyCart
+                          ?.map((item: any) => item.price * item.quantity)
+                          .reduce((a: any, b: any) => a + b, 0)
+                      )}
+                    </span>
+                  </h3>
                 </Col>
-              )}
-              <Col>
-                <h3>
-                  Subtotal:{" "}
-                  <span style={{ color: "#edb932" }}>
-                    $
-                    {dataMyCart
-                      ?.map((item: any) => item.price * item.quantity)
-                      .reduce((a: any, b: any) => a + b, 0)
-                      .toFixed(2)}
-                  </span>
-                </h3>
-              </Col>
-            </Row>
-          </Col>
+              </Row>
+            </Col>
+          )
         }
         closable={false}
         placement="right"
@@ -177,6 +183,7 @@ export const AppHeader: React.FC = () => {
       >
         <Col>
           {!isLoading &&
+            !isLoadingMyCart &&
             dataMyCart?.map((item: any) => {
               return (
                 <Row className="product-cart">
@@ -224,7 +231,9 @@ export const AppHeader: React.FC = () => {
                       <DeleteOutlined onClick={() => handleDelete(item)} />
                     </Row>
                     <Row justify={"center"} style={{ paddingTop: 10 }}>
-                      <h3 style={{ color: "#edb932" }}>${item?.price}</h3>{" "}
+                      <h3 style={{ color: "#edb932" }}>
+                        ₫{formatPrice(item?.price)}
+                      </h3>{" "}
                     </Row>
                   </Col>
                 </Row>
