@@ -10,10 +10,14 @@ import { Statistic } from "../components/statistic";
 
 export const Admin = () => {
   const navigate = useNavigate();
-  const [selectedMenu, setSelectedMenu] = useState("statistics");
+  const dataEmployee = JSON.parse(localStorage.getItem("dataEmployee") || "{}");
+  const [selectedMenu, setSelectedMenu] = useState(
+    dataEmployee.data.role == "ql" ? "users" : "statistics"
+  );
   const handleMenuClick = (e: any) => {
     setSelectedMenu(e.key); // Cập nhật trạng thái khi mục SideNav được chọn
   };
+
   const [isAuthenticated] = useState(localStorage.getItem("loginAdmin"));
   return (
     <>
@@ -27,13 +31,21 @@ export const Admin = () => {
                 <Menu
                   theme="dark"
                   mode="vertical"
-                  defaultSelectedKeys={["statistics"]}
+                  defaultSelectedKeys={[
+                    dataEmployee.data.role == "ql" ? "users" : "statistics",
+                  ]}
                   onClick={handleMenuClick} //Gọi hàm xử lý khi click vào mục SideNav
                 >
-                  <Menu.Item key="statistics">Thống kê</Menu.Item>
-                  <Menu.Item key="products">Sản phẩm</Menu.Item>
-                  <Menu.Item key="users">Người dùng</Menu.Item>
-                  <Menu.Item key="orders">Đơn hàng</Menu.Item>
+                  {dataEmployee.data.role == "ql" && (
+                    <Menu.Item key="users">Người dùng</Menu.Item>
+                  )}
+                  {dataEmployee.data.role == "nv" && (
+                    <>
+                      <Menu.Item key="statistics">Thống kê</Menu.Item>
+                      <Menu.Item key="products">Sản phẩm</Menu.Item>
+                      <Menu.Item key="orders">Đơn hàng</Menu.Item>
+                    </>
+                  )}
                   <Menu.Item onClick={handleLogout}>Đăng xuất</Menu.Item>
                 </Menu>
               </Sider>

@@ -1,16 +1,12 @@
-import { Input, Button, Form, message } from "antd";
+import { useMutationLoginManager } from "@/pages/app.loader";
+import { Input, Button, Form } from "antd";
 import { useNavigate } from "react-router-dom";
 
 export const LayoutAdmin = () => {
   const navigate = useNavigate();
+  const { mutate } = useMutationLoginManager();
   const onFinish = (values: any) => {
-    if (values.username === "admin" && values.password === "admin") {
-      localStorage.setItem("loginAdmin", "true");
-      navigate("/admin");
-      message.success("Đăng nhập thành công");
-    } else {
-      message.error("Sai tên đăng nhập hoặc mật khẩu");
-    }
+    mutate(values);
   };
   return (
     <>

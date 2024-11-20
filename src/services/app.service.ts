@@ -66,6 +66,10 @@ export const checkLogin = async (data: any) => {
   const result = await apiClient.post("/login", data);
   return result.data;
 };
+export const checkLoginManager = async (data: any) => {
+  const result = await apiClient.post("/login-manager", data);
+  return result.data;
+};
 export const addCustomer = async (data: any) => {
   const result = await apiClient.post("/create-customer", data);
   return result.data;

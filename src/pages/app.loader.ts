@@ -26,6 +26,7 @@ import {
   getAllVouchers,
   reviewedOrder,
   acceptOrder,
+  checkLoginManager,
 } from "@/services/app.service";
 import { message } from "antd";
 import { useMutation, useQuery, useQueryClient } from "react-query";
@@ -57,6 +58,26 @@ export const useMutationLogin = () => {
         localStorage.setItem("token", "true");
         message.success("Login Success");
         navigate("/"); // TODO: Fix Na
+      },
+      onError: () => {
+        message.error("Login Failed");
+      },
+    }
+  );
+};
+export const useMutationLoginManager = () => {
+  const navigate = useNavigate();
+
+  return useMutation(
+    (data: any) => {
+      return checkLoginManager(data);
+    },
+    {
+      onSuccess: (data) => {
+        localStorage.setItem("loginAdmin", "true");
+        localStorage.setItem("dataEmployee", JSON.stringify(data));
+        navigate("/admin");
+        message.success("Login Success");
       },
       onError: () => {
         message.error("Login Failed");
