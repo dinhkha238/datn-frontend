@@ -18,7 +18,7 @@ interface Shipping {
   fees: number;
 }
 interface Voucher {
-  id: string;
+  id: number;
   name: string;
   value: number;
 }
@@ -39,7 +39,7 @@ export const CheckOut = () => {
     address: "",
   });
   const [voucher, setVoucher] = useState<Voucher>({
-    id: "",
+    id: 0,
     name: "",
     value: 0,
   });
@@ -135,14 +135,17 @@ export const CheckOut = () => {
                       src={item?.url}
                       preview={false}
                       width={100}
-                      style={{ height: 100, margin: "10px 0 0 20px" }}
+                      style={{ height: 100, margin: "10px 0 10px 20px" }}
                     />
                   </Col>
-                  <Col span={16} style={{ paddingTop: 60, paddingLeft: 10 }}>
+                  <Col span={16} style={{ paddingTop: 30, paddingLeft: 10 }}>
                     <Row>
                       <h3>
                         {item.name} x {item.quantity}
                       </h3>
+                    </Row>
+                    <Row>
+                      <div>₫{formatPrice(item.price)}</div>
                     </Row>
                   </Col>
                   <Col span={4} style={{ paddingTop: 40 }} pull={1}>
@@ -305,7 +308,12 @@ export const CheckOut = () => {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
+
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    const seconds = String(date.getSeconds()).padStart(2, "0");
+
+    return `${year}/${month}/${day} - ${hours}:${minutes}:${seconds}`;
   }
   function generateRandomId(length = 18) {
     const characters =
@@ -325,8 +333,6 @@ export const CheckOut = () => {
       message.error("Please enter your phone number");
     } else if (feeShip.id === "") {
       message.error("Please select a shipping unit");
-    } else if (voucher.id === "") {
-      message.error("Please select a voucher");
     } else if (typePayment === "") {
       message.error("Please select a payment type");
     } else {
