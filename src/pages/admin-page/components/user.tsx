@@ -283,7 +283,7 @@ export const User = () => {
     <div>
       <Row justify={"space-between"}>
         <Col>
-          <h2>Users</h2>
+          <h2>Danh sách người dùng</h2>
         </Col>
         <Col>
           <Button type="primary" onClick={showModal} style={{ margin: 20 }}>

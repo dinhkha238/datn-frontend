@@ -87,7 +87,7 @@ export const Order = () => {
     <div>
       <Row justify={"space-between"}>
         <Col>
-          <h2>Orders</h2>
+          <h2>Danh sách đơn hàng</h2>
         </Col>
         <Col>
           <Col>

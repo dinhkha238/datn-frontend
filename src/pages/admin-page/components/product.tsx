@@ -264,7 +264,7 @@ export const Product = () => {
     <div>
       <Row justify={"space-between"}>
         <Col>
-          <h2>Product</h2>
+          <h2>Sản phẩm</h2>
         </Col>
         <Col>
           <Button type="primary" onClick={showModal} style={{ margin: 20 }}>

@@ -44,7 +44,7 @@ export const Statistic = () => {
     <div>
       <Row justify={"space-between"}>
         <Col>
-          <h2>Statistics</h2>
+          <h2>Thống kê</h2>
         </Col>
       </Row>
       <Row>

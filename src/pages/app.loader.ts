@@ -27,6 +27,7 @@ import {
   reviewedOrder,
   acceptOrder,
   checkLoginManager,
+  findSimilar,
 } from "@/services/app.service";
 import { message } from "antd";
 import { useMutation, useQuery, useQueryClient } from "react-query";
@@ -297,6 +298,19 @@ export const useCreateOrder = () => {
     }
   );
 };
+
+export const useFindSimilar = () => {
+  return useMutation(
+    (data: any) => {
+      return findSimilar(data);
+    },
+    {
+      onSuccess: () => {},
+      onError: () => {},
+    }
+  );
+};
+
 export const useDeleteOrder = () => {
   const queryClient = useQueryClient();
   return useMutation(

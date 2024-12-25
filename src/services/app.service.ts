@@ -86,6 +86,14 @@ export const createPayment = async (data: any) => {
   const result = await apiClient.post("/vnpay_payment", data);
   return result.data;
 };
+export const findSimilar = async (data: any) => {
+  const result = await apiClient.post("/find-similar-images", data, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return result.data;
+};
 
 // put
 export const addToCart = async (id: any) => {
