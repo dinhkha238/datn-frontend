@@ -7,10 +7,13 @@ import { Navigate, useNavigate } from "react-router-dom";
 import { Order } from "../components/order";
 import { Cart } from "../components/cart";
 import { Statistic } from "../components/statistic";
+import { Employee } from "../components/employee";
+import { Customer } from "../components/customer";
 
 export const Admin = () => {
   const navigate = useNavigate();
   const dataEmployee = JSON.parse(localStorage.getItem("dataEmployee") || "{}");
+  console.log(dataEmployee);
   const [selectedMenu, setSelectedMenu] = useState(
     dataEmployee.data.role == "ql" ? "users" : "statistics"
   );
@@ -37,7 +40,11 @@ export const Admin = () => {
                   onClick={handleMenuClick} //Gọi hàm xử lý khi click vào mục SideNav
                 >
                   {dataEmployee.data.role == "ql" && (
-                    <Menu.Item key="users">Người dùng</Menu.Item>
+                    <>
+                      <Menu.Item key="users">Quản lý người dùng</Menu.Item>
+                      <Menu.Item key="customers">Quản lý khách hàng</Menu.Item>
+                      <Menu.Item key="employees">Quản lý nhân viên</Menu.Item>
+                    </>
                   )}
                   {dataEmployee.data.role == "nv" && (
                     <>
@@ -48,12 +55,33 @@ export const Admin = () => {
                   )}
                   <Menu.Item onClick={handleLogout}>Đăng xuất</Menu.Item>
                 </Menu>
+                <Row
+                  style={{
+                    color: "white",
+                    position: "absolute",
+                    bottom: 30,
+                    width: "100%",
+                    left: 20,
+                  }}
+                >
+                  <Col>
+                    <Row>
+                      <h2>{dataEmployee.data.user.fullname}</h2>
+                    </Row>
+                    <Row>
+                      Vị trí:{" "}
+                      {dataEmployee.data.role == "ql" ? "Quản lý" : "Nhân viên"}
+                    </Row>
+                  </Col>
+                </Row>
               </Sider>
             </Layout>
           </Col>
           <Col span={20}>
             {selectedMenu === "products" && <Product />}
             {selectedMenu === "users" && <User />}
+            {selectedMenu === "employees" && <Employee />}
+            {selectedMenu === "customers" && <Customer />}
             {selectedMenu === "carts" && <Cart />}
             {selectedMenu === "orders" && <Order />}
             {selectedMenu === "statistics" && <Statistic />}

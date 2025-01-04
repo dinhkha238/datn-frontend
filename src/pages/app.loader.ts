@@ -251,7 +251,9 @@ export const useUpdateProduct = () => {
   const queryClient = useQueryClient();
   return useMutation(
     (data: any) => {
-      return updateProduct(data);
+      var productForm = data.get("product");
+      var productData = JSON.parse(productForm);
+      return updateProduct(productData.id, data);
     },
     {
       onSuccess: () => {
@@ -376,8 +378,8 @@ export const useCustomer = () => {
 export const useCustomers = () => {
   return useQuery(CACHE_KEYS.InforCustomers, () => getCustomers());
 };
-export const useOrders = (time: any) => {
-  return useQuery([CACHE_KEYS.InforOrders, time], () => getOrders(time));
+export const useOrders = (data: any) => {
+  return useQuery([CACHE_KEYS.InforOrders, data], () => getOrders(data));
 };
 export const useOrderById = (data: any) => {
   return useQuery([CACHE_KEYS.InforOrder, data], () => getOrderById(data));

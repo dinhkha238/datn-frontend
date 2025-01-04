@@ -8,13 +8,16 @@ import {
   Row,
   Table,
   Image,
+  Pagination,
 } from "antd";
 import { useState } from "react";
 
 export const Order = () => {
   const [isTime, setIsTime] = useState("all");
+  const [isPage, setIsPage] = useState(1);
   const { data: dataOrder } = useOrders({
     month_year: isTime,
+    page: isPage,
   });
   const [idOrder, setIdOrder] = useState("");
   const { data: dataOrderById, isLoading: isLoadingOrderById } = useOrderById({
@@ -81,6 +84,7 @@ export const Order = () => {
     setIsModalVisible(false);
   };
   const onChange: DatePickerProps["onChange"] = (_, dateString) => {
+    setIsPage(1);
     setIsTime(dateString);
   };
   return (
@@ -99,7 +103,21 @@ export const Order = () => {
           </Col>
         </Col>
       </Row>
-      <Table dataSource={dataOrder} columns={columns} />;
+      <Table
+        dataSource={dataOrder?.orders}
+        columns={columns}
+        pagination={false}
+      />
+      {dataOrder && (
+        <Row justify={"end"} style={{ margin: "30px" }}>
+          <Pagination
+            current={isPage}
+            total={dataOrder?.total_pages * 10}
+            showSizeChanger={false}
+            onChange={changePage}
+          />
+        </Row>
+      )}
       {isModalVisible && !isLoadingOrderById && (
         <Modal
           title="Chi tiết đơn hàng"
@@ -210,4 +228,7 @@ export const Order = () => {
       )}
     </div>
   );
+  function changePage(page: number) {
+    setIsPage(page);
+  }
 };

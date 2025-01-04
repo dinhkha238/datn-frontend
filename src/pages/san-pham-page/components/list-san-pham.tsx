@@ -3,12 +3,19 @@ import {
   useFeedbackByIdProduct,
   useProductItemById,
 } from "@/pages/admin-page/product.loader";
-import { useAddToCart, useCreateOrder, useProducts } from "@/pages/app.loader";
 import {
+  useAddToCart,
+  useCreateOrder,
+  useFindSimilar,
+  useProducts,
+} from "@/pages/app.loader";
+import {
+  CameraOutlined,
   EyeOutlined,
   MenuUnfoldOutlined,
   ShoppingCartOutlined,
   StopOutlined,
+  UploadOutlined,
 } from "@ant-design/icons";
 import {
   Row,
@@ -24,6 +31,7 @@ import {
   Button,
   Rate,
   message,
+  Upload,
 } from "antd";
 import MenuItem from "antd/es/menu/MenuItem";
 import React, { useEffect, useState } from "react";
@@ -71,9 +79,12 @@ export const ListSanPham = () => {
   const [valueSelect, setValueSelect] = useState("Default sorting");
   const [showInforProduct, setShowInforProduct] = useState(false);
   const [idProduct, setIdProduct] = useState(1);
+  const [isFind, setIsFind] = useState(false);
 
   const { mutate } = useAddToCart();
   const { mutate: createOrder } = useCreateOrder();
+  const { mutate: findSimilar, data: dataFind } = useFindSimilar();
+  const [selectedFile, setSelectedFile] = useState(null);
 
   const { data: dataProduct, isLoading: isLoadingProduct } = useProductItemById(
     { id: idProduct }
@@ -103,8 +114,62 @@ export const ListSanPham = () => {
   const formatPrice = (price: any) => {
     return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   };
+  const handleUpload = async () => {
+    if (!selectedFile) {
+      alert("Please select a file first!");
+      return;
+    }
+    setIsFind(true);
+
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+
+    findSimilar(formData);
+  };
+  const uploadProps = {
+    accept: "image/*",
+    maxCount: 1, // Giới hạn chỉ cho phép upload 1 file
+    beforeUpload: (file: any) => {
+      setSelectedFile(file);
+      return false; // Để chặn upload tự động của antd, xử lý thủ công
+    },
+    onChange: (info: any) => {
+      if (info.file.status === "removed") {
+        console.log("File removed");
+      }
+    },
+  };
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const showModal = () => {
+    setIsModalVisible(true);
+  };
+
+  const handleOk = () => {
+    handleUpload();
+    setIsModalVisible(false);
+  };
+
+  const handleCancel = () => {
+    setIsModalVisible(false);
+  };
   return (
     <>
+      <div style={{ padding: "20px" }}>
+        <Modal
+          title="Search for similar images"
+          visible={isModalVisible}
+          onOk={handleOk}
+          onCancel={handleCancel}
+          okText="Upload"
+          cancelText="Cancel"
+        >
+          <Upload {...uploadProps} listType="picture">
+            <Button icon={<UploadOutlined />} type="primary" block>
+              Select Image
+            </Button>
+          </Upload>
+        </Modal>
+      </div>
       <div className="products">
         <ScrollToTop />
         <Row>
@@ -136,10 +201,22 @@ export const ListSanPham = () => {
           <Col span={20}>
             <div className="product-products">
               <Row>
-                <Col push={2} span={4}>
-                  <Input placeholder="Tìm kiếm" onPressEnter={handleSearch} />
+                <Col push={2} span={10}>
+                  <Row>
+                    <Col span={10}>
+                      <Input
+                        placeholder="Tìm kiếm"
+                        onPressEnter={handleSearch}
+                      />
+                    </Col>
+                    <Col>
+                      <Button onClick={showModal} style={{ marginLeft: 10 }}>
+                        <CameraOutlined style={{ fontSize: 18 }} />
+                      </Button>
+                    </Col>
+                  </Row>
                 </Col>
-                <Col push={14}>
+                <Col push={10}>
                   <Select
                     defaultValue="option1"
                     style={{ width: 150 }}
@@ -158,61 +235,148 @@ export const ListSanPham = () => {
                 style={{ paddingLeft: 100, paddingTop: 50, paddingRight: 100 }}
                 gutter={16}
               >
-                {dataProducts?.length > 0 ? (
-                  dataProducts?.map((item: any) => {
-                    return (
-                      <Col span={8} offset={0} className="name-product-home">
-                        <Row justify={"center"}>
-                          <Image
-                            preview={false}
-                            src={item.url}
-                            width={200}
-                            style={{ height: 200 }}
-                          />
-                          {item.inStock > 0 ? (
-                            <Popover content={content} placement="left">
-                              <ShoppingCartOutlined
-                                className="icon-add-cart"
-                                onClick={handleAddToCart}
+                {isFind ? (
+                  <>
+                    {dataFind?.length > 0 ? (
+                      dataFind?.map((item: any) => {
+                        return (
+                          <Col
+                            span={8}
+                            offset={0}
+                            className="name-product-home"
+                          >
+                            <Row justify={"center"}>
+                              <Image
+                                preview={false}
+                                src={item.url}
+                                width={200}
+                                style={{ height: 200 }}
                               />
-                            </Popover>
-                          ) : (
-                            <Popover content={"Sold out"} placement="left">
-                              <StopOutlined
-                                className="icon-add-cart"
-                                style={{ color: "red" }}
-                              />
-                            </Popover>
-                          )}
-                          <Popover content={"Product detail"} placement="left">
-                            <EyeOutlined
-                              className="icon-detail"
-                              onClick={handleProductDetail}
-                            />
-                          </Popover>
-                        </Row>
-                        <div className="infor-product">
-                          <Row justify="center">{item.name}</Row>
-                          <Row justify="center" className="color-borrow font">
-                            {item.summary}
-                          </Row>
-                          <Row justify="center">₫{formatPrice(item.price)}</Row>
-                        </div>
-                      </Col>
-                    );
-                    function handleAddToCart() {
-                      addToCart(item.productId);
-                    }
-                    function handleProductDetail() {
-                      productDetail(item.productId);
-                    }
-                  })
+                              {item.inStock > 0 ? (
+                                <Popover content={content} placement="left">
+                                  <ShoppingCartOutlined
+                                    className="icon-add-cart"
+                                    onClick={handleAddToCart}
+                                  />
+                                </Popover>
+                              ) : (
+                                <Popover content={"Sold out"} placement="left">
+                                  <StopOutlined
+                                    className="icon-add-cart"
+                                    style={{ color: "red" }}
+                                  />
+                                </Popover>
+                              )}
+                              <Popover
+                                content={"Product detail"}
+                                placement="left"
+                              >
+                                <EyeOutlined
+                                  className="icon-detail"
+                                  onClick={handleProductDetail}
+                                />
+                              </Popover>
+                            </Row>
+                            <div className="infor-product">
+                              <Row justify="center">{item.name}</Row>
+                              <Row
+                                justify="center"
+                                className="color-borrow font"
+                              >
+                                {item.summary}
+                              </Row>
+                              <Row justify="center">
+                                ₫{formatPrice(item.price)}
+                              </Row>
+                            </div>
+                          </Col>
+                        );
+                        function handleAddToCart() {
+                          addToCart(item.productId);
+                        }
+                        function handleProductDetail() {
+                          productDetail(item.productId);
+                        }
+                      })
+                    ) : (
+                      <Empty
+                        description={
+                          "No products were found matching your selection."
+                        }
+                      />
+                    )}
+                  </>
                 ) : (
-                  <Empty
-                    description={
-                      "No products were found matching your selection."
-                    }
-                  />
+                  <>
+                    {dataProducts?.length > 0 ? (
+                      dataProducts?.map((item: any) => {
+                        return (
+                          <Col
+                            span={8}
+                            offset={0}
+                            className="name-product-home"
+                          >
+                            <Row justify={"center"}>
+                              <Image
+                                preview={false}
+                                src={item.url}
+                                width={200}
+                                style={{ height: 200 }}
+                              />
+                              {item.inStock > 0 ? (
+                                <Popover content={content} placement="left">
+                                  <ShoppingCartOutlined
+                                    className="icon-add-cart"
+                                    onClick={handleAddToCart}
+                                  />
+                                </Popover>
+                              ) : (
+                                <Popover content={"Sold out"} placement="left">
+                                  <StopOutlined
+                                    className="icon-add-cart"
+                                    style={{ color: "red" }}
+                                  />
+                                </Popover>
+                              )}
+                              <Popover
+                                content={"Product detail"}
+                                placement="left"
+                              >
+                                <EyeOutlined
+                                  className="icon-detail"
+                                  onClick={handleProductDetail}
+                                />
+                              </Popover>
+                            </Row>
+                            <div className="infor-product">
+                              <Row justify="center">{item.name}</Row>
+                              <Row
+                                justify="center"
+                                className="color-borrow font"
+                              >
+                                {item.summary}
+                              </Row>
+                              <Row justify="center">
+                                ₫{formatPrice(item.price)}
+                              </Row>
+                            </div>
+                          </Col>
+                        );
+                        function handleAddToCart() {
+                          addToCart(item.productId);
+                        }
+                        function handleProductDetail() {
+                          productDetail(item.productId);
+                        }
+                      })
+                    ) : (
+                      <Empty
+                        description={
+                          "No products were found matching your selection."
+                        }
+                      />
+                    )}
+                  </>
                 )}
               </Row>
             </div>

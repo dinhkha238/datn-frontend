@@ -16,10 +16,10 @@ export const getCustomer = async () => {
   const result = await apiClient.get("/get-customer");
   return result.data;
 };
-export const getOrders = async (time: any) => {
-  const result = await apiClient.get("/get-all-orders", {
-    params: filterEmptyString(time),
-  });
+export const getOrders = async (data: any) => {
+  const result = await apiClient.get(
+    `/get-all-orders?month_year=${data?.month_year}&page=${data?.page}`
+  );
   return result.data;
 };
 export const getOrderById = async (data: any) => {
@@ -75,7 +75,11 @@ export const addCustomer = async (data: any) => {
   return result.data;
 };
 export const addProduct = async (data: any) => {
-  const result = await apiClient.post("/add-product", data);
+  const result = await apiClient.post("/add-product", data, {
+    headers: {
+      "Content-Type": "multipart/form-data", // Đảm bảo Content-Type là multipart/form-data
+    },
+  });
   return result.data;
 };
 export const createOrder = async (data: any) => {
@@ -104,8 +108,12 @@ export const decreaseProduct = async (id: any) => {
   const result = await apiClient.put(`/reduce-item-to-cart/${id}`, id);
   return result.data;
 };
-export const updateProduct = async (data: any) => {
-  const result = await apiClient.put(`/update-product/${data.id}`, data);
+export const updateProduct = async (id: any, data: any) => {
+  const result = await apiClient.put(`/update-product/${id}`, data, {
+    headers: {
+      "Content-Type": "multipart/form-data", // Đảm bảo Content-Type là multipart/form-data
+    },
+  });
   return result.data;
 };
 export const updateCustomer = async (data: any) => {
