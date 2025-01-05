@@ -322,6 +322,7 @@ export const useDeleteOrder = () => {
     {
       onSuccess: () => {
         queryClient.invalidateQueries(CACHE_KEYS.InforMyOrders);
+        queryClient.invalidateQueries(CACHE_KEYS.InforOrders);
         message.success("Cancel order success");
       },
       onError: () => {
