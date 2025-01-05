@@ -1,4 +1,9 @@
-import { useAcceptOrder, useOrderById, useOrders } from "@/pages/app.loader";
+import {
+  useAcceptOrder,
+  useDeleteOrder,
+  useOrderById,
+  useOrders,
+} from "@/pages/app.loader";
 import {
   Button,
   Col,
@@ -9,12 +14,16 @@ import {
   Table,
   Image,
   Pagination,
+  Alert,
+  Tag,
 } from "antd";
 import { useState } from "react";
 
 export const Order = () => {
   const [isTime, setIsTime] = useState("all");
   const [isPage, setIsPage] = useState(1);
+  const [idSelectedOrder, setIdSelectedOrder] = useState();
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const { data: dataOrder } = useOrders({
     month_year: isTime,
     page: isPage,
@@ -24,18 +33,32 @@ export const Order = () => {
     id: idOrder,
   });
   const { mutate: mutateAcceptOrder } = useAcceptOrder();
+  const { mutate: mutateDeleteOrder } = useDeleteOrder();
   const formatPrice = (price: any) => {
     return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  };
+  const handleShowModalDelete = (id: any) => {
+    setIdSelectedOrder(id);
+    setIsModalOpen(true);
+  };
+  const handleOkDelete = () => {
+    mutateDeleteOrder(idSelectedOrder);
+    setIsModalOpen(false);
+  };
+  const handleCancelDelete = () => {
+    setIsModalOpen(false);
   };
 
   const columns = [
     {
       title: "ID",
       dataIndex: "id",
+      width: 200,
     },
     {
       title: "Thời gian tạo",
       dataIndex: "createdAt",
+      width: 200,
     },
     {
       title: "Tổng tiền",
@@ -43,10 +66,12 @@ export const Order = () => {
       render: (total: any) => {
         return <div>₫{formatPrice(total)}</div>;
       },
+      width: 200,
     },
     {
       title: "Xem chi tiết",
       dataIndex: "",
+      width: 200,
       render: (_: any, data: any) => {
         return (
           <Button onClick={() => handleShowModal(data)}>Xem chi tiết</Button>
@@ -56,20 +81,37 @@ export const Order = () => {
     {
       title: "Trạng thái",
       dataIndex: "payStatus",
-      width: 200,
+      width: 300,
       render: (status: any, data: any) => {
         if (status === 0) {
           return (
-            <Button
-              onClick={() => {
-                mutateAcceptOrder(data?.id);
-              }}
-            >
-              Xác nhận
-            </Button>
+            <Row>
+              <Col span={8}>
+                <Button
+                  type="primary"
+                  onClick={() => {
+                    mutateAcceptOrder(data?.id);
+                  }}
+                >
+                  Xác nhận
+                </Button>
+              </Col>
+              <Col span={12}>
+                <Button
+                  danger
+                  onClick={() => {
+                    handleShowModalDelete(data?.id);
+                  }}
+                >
+                  Hủy đơn
+                </Button>
+              </Col>
+            </Row>
           );
+        } else if (status === -1) {
+          return <Tag color="red">Đơn hàng đã hủy</Tag>;
         } else {
-          return <div>Đã thanh toán</div>;
+          return <Tag color="green">Đơn hàng đã hoàn thành</Tag>;
         }
       },
     },
@@ -118,6 +160,18 @@ export const Order = () => {
           />
         </Row>
       )}
+      <Modal
+        title="Hủy đơn hàng"
+        open={isModalOpen}
+        onOk={handleOkDelete}
+        onCancel={handleCancelDelete}
+      >
+        <Alert
+          message={<p>Bạn có chắc chắn muốn hủy đơn hàng không?</p>}
+          type="error"
+          showIcon
+        />
+      </Modal>
       {isModalVisible && !isLoadingOrderById && (
         <Modal
           title="Chi tiết đơn hàng"
