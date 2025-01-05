@@ -350,7 +350,7 @@ export const Product = () => {
                 <Select placeholder="Chọn loại phòng">
                   <Option value="Bathroom">Phòng tắm</Option>
                   <Option value="Bedroom">Phòng ngủ</Option>
-                  <Option value="Living Room">Phòng khách</Option>
+                  <Option value="Livingroom">Phòng khách</Option>
                   <Option value="Kitchen">Phòng bếp</Option>
                 </Select>
               </Form.Item>
