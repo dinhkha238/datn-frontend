@@ -18,6 +18,7 @@ export const SignUp: React.FC = () => {
   const { mutate } = useMutationRegister();
   const onFinish = (values: any) => {
     values.birth = values.birth.format("YYYY-MM-DD");
+    values.role = "kh";
     mutate(values);
   };
   const validatePassword = (_: any, value: any) => {
