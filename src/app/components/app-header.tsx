@@ -10,6 +10,7 @@ import {
   Button,
   Form,
   Modal,
+  Select,
 } from "antd";
 import "./app-header.css";
 import {
@@ -278,6 +279,15 @@ export const AppHeader: React.FC = () => {
           </Form.Item>
           <Form.Item label="Address" name="address">
             <Input style={{ height: 30 }} placeholder="Address" />
+          </Form.Item>
+          <Form.Item label="Gender" name="gender">
+            <Select
+              options={[
+                { value: "Nam", label: "Nam" },
+                { value: "Nữ", label: "Nữ" },
+              ]}
+              placeholder={"Select gender"}
+            />
           </Form.Item>
         </Form>
       </Modal>

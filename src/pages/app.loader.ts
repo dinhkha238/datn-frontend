@@ -28,6 +28,7 @@ import {
   acceptOrder,
   checkLoginManager,
   findSimilar,
+  getUsers,
 } from "@/services/app.service";
 import { message } from "antd";
 import { useMutation, useQuery, useQueryClient } from "react-query";
@@ -36,6 +37,7 @@ export const CACHE_KEYS = {
   InforProducts: "INFOR_PRODUCTS",
   InforCustomer: "INFOR_CUSTOMER",
   InforCustomers: "INFOR_CUSTOMERS",
+  InforUsers: "INFOR_USERS",
   InforOrders: "INFOR_ORDERS",
   InforOrder: "INFOR_ORDER",
   InforCarts: "INFOR_CARTS",
@@ -114,7 +116,7 @@ export const useAddUser = () => {
     },
     {
       onSuccess: () => {
-        queryClient.invalidateQueries(CACHE_KEYS.InforCustomers);
+        queryClient.invalidateQueries(CACHE_KEYS.InforUsers);
         message.success("Add user success");
       },
       onError: () => {
@@ -132,6 +134,7 @@ export const useUpdateUser = () => {
     },
     {
       onSuccess: () => {
+        queryClient.invalidateQueries(CACHE_KEYS.InforUsers);
         queryClient.invalidateQueries(CACHE_KEYS.InforCustomer);
         message.success("Update user success");
       },
@@ -144,12 +147,12 @@ export const useUpdateUser = () => {
 export const useDeleteUser = () => {
   const queryClient = useQueryClient();
   return useMutation(
-    (id: any) => {
-      return deleteCustomer(id);
+    (data: any) => {
+      return deleteCustomer(data);
     },
     {
       onSuccess: () => {
-        queryClient.invalidateQueries(CACHE_KEYS.InforCustomers);
+        queryClient.invalidateQueries(CACHE_KEYS.InforUsers);
         message.success("Delete user success");
       },
       onError: () => {
@@ -378,6 +381,9 @@ export const useCustomer = () => {
 };
 export const useCustomers = () => {
   return useQuery(CACHE_KEYS.InforCustomers, () => getCustomers());
+};
+export const useUsers = () => {
+  return useQuery(CACHE_KEYS.InforUsers, () => getUsers());
 };
 export const useOrders = (data: any) => {
   return useQuery([CACHE_KEYS.InforOrders, data], () => getOrders(data));

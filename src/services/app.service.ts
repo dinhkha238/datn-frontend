@@ -2,6 +2,10 @@ import { apiClient, filterEmptyString } from "@/utils/api";
 
 //get
 export const getCustomers = async () => {
+  const result = await apiClient.get("/get-all-customer");
+  return result.data;
+};
+export const getUsers = async () => {
   const result = await apiClient.get("/get-all-user");
   return result.data;
 };
@@ -134,8 +138,10 @@ export const deleteProduct = async (id: any) => {
   const result = await apiClient.delete(`/delete-product/${id}`);
   return result.data;
 };
-export const deleteCustomer = async (id: any) => {
-  const result = await apiClient.delete(`/delete-user/${id}`);
+export const deleteCustomer = async (data: any) => {
+  const result = await apiClient.delete(
+    `/delete-user/${data?.id}/${data?.role}`
+  );
   return result.data;
 };
 export const deleteOrder = async (id: any) => {

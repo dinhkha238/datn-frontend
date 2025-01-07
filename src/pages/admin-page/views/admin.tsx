@@ -40,8 +40,8 @@ export const Admin = () => {
                   {dataEmployee.data.role == "qtv" && (
                     <>
                       <Menu.Item key="users">Quản lý người dùng</Menu.Item>
-                      <Menu.Item key="customers">Quản lý khách hàng</Menu.Item>
-                      <Menu.Item key="employees">Quản lý nhân viên</Menu.Item>
+                      {/* <Menu.Item key="customers">Quản lý khách hàng</Menu.Item> */}
+                      {/* <Menu.Item key="employees">Quản lý nhân viên</Menu.Item> */}
                     </>
                   )}
                   {dataEmployee.data.role == "nv" && (
@@ -79,8 +79,8 @@ export const Admin = () => {
           </Col>
           <Col span={20}>
             {selectedMenu === "users" && <User />}
-            {selectedMenu === "employees" && <Employee />}
-            {selectedMenu === "customers" && <Customer />}
+            {/* {selectedMenu === "employees" && <Employee />} */}
+            {/* {selectedMenu === "customers" && <Customer />} */}
             {selectedMenu === "statistics" && <Statistic />}
             {selectedMenu === "products" && <Product />}
             {selectedMenu === "orders" && <Order />}

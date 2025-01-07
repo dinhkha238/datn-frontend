@@ -1,8 +1,8 @@
 import {
-  useCustomers,
   useAddUser,
   useDeleteUser,
   useUpdateUser,
+  useUsers,
 } from "@/pages/app.loader";
 import {
   EditOutlined,
@@ -33,7 +33,7 @@ interface DataType {
 }
 
 export const User = () => {
-  const { data: dataCustomers } = useCustomers();
+  const { data: dataUsers } = useUsers();
   const [optionModal, setOptionModal] = useState("");
   const [visible, setVisible] = useState(false);
   const [idSelected, setIdSelected] = useState("");
@@ -46,9 +46,9 @@ export const User = () => {
     setVisible(true);
   };
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [userSelected, setUserSelected] = useState();
+  const [userSelected, setUserSelected] = useState<any>();
   const handleOkDelete = () => {
-    mutateDeleteUser(idSelected);
+    mutateDeleteUser(userSelected);
     setIsModalOpen(false);
   };
 
@@ -151,6 +151,16 @@ export const User = () => {
       width: 300,
     },
     {
+      title: "Role",
+      dataIndex: "role",
+      width: 300,
+      render: (role: any) => {
+        if (role === "kh") return <>Khách hàng</>;
+        else if (role === "nv") return <>Nhân viên</>;
+        else return <>Quản trị viên</>;
+      },
+    },
+    {
       title: "Gender",
       dataIndex: "gender",
       width: 300,
@@ -189,11 +199,12 @@ export const User = () => {
           setVisible(true);
           setIdSelected(data.id);
           form.setFieldsValue(data);
+          setUserSelected(data);
         }
         function handleDelete() {
           setIsModalOpen(true);
           setIdSelected(data.id);
-          setUserSelected(data.user);
+          setUserSelected(data);
         }
       },
     },
@@ -291,7 +302,7 @@ export const User = () => {
           </Button>
         </Col>
       </Row>
-      <Table dataSource={dataCustomers} columns={columns} />;
+      <Table dataSource={dataUsers} columns={columns} />;
       <Modal
         title={
           optionModal === "Add" ? "Thêm người dùng" : "Sửa thông tin người dùng"
@@ -356,23 +367,65 @@ export const User = () => {
             <Input style={{ height: 30 }} placeholder="Address" />
           </Form.Item>
 
-          {optionModal === "Add" && (
-            <Row justify={"space-between"}>
+          <Row justify={"space-between"}>
+            <Col span={11}>
+              <Form.Item
+                label="Gender"
+                name="gender"
+                rules={[{ required: true, message: "Please select gender!" }]}
+              >
+                <Select
+                  options={[
+                    { value: "Nam", label: "Nam" },
+                    { value: "Nữ", label: "Nữ" },
+                  ]}
+                  placeholder={"Select gender"}
+                />
+              </Form.Item>
+            </Col>
+            {optionModal === "Add" && (
               <Col span={11}>
                 <Form.Item
-                  label="Gender"
-                  name="gender"
-                  rules={[{ required: true, message: "Please input gender !" }]}
+                  label="Role"
+                  name="role"
+                  rules={[{ required: true, message: "Please select role!" }]}
                 >
                   <Select
                     options={[
-                      { value: "Nam", label: "Nam" },
-                      { value: "Nữ", label: "Nữ" },
+                      { value: "kh", label: "Khách hàng" },
+                      { value: "qtv", label: "Quản trị viên" },
+                      { value: "nv", label: "Nhân viên" },
                     ]}
-                    placeholder={"Select gender"}
+                    placeholder={"Select role"}
                   />
                 </Form.Item>
               </Col>
+            )}
+            {optionModal !== "Add" && (
+              <Col span={11}>
+                <Form.Item
+                  label="Role"
+                  name="role"
+                  rules={[{ required: true, message: "Please select role!" }]}
+                >
+                  <Select
+                    options={
+                      userSelected?.role === "kh"
+                        ? [{ value: "kh", label: "Khách hàng" }]
+                        : [
+                            { value: "qtv", label: "Quản trị viên" },
+                            { value: "nv", label: "Nhân viên" },
+                          ]
+                    }
+                    placeholder={"Select role"}
+                  />
+                </Form.Item>
+              </Col>
+            )}
+          </Row>
+
+          <Row>
+            {optionModal === "Add" && (
               <Col span={11}>
                 <Form.Item
                   label="Birthday"
@@ -384,8 +437,8 @@ export const User = () => {
                   <DatePicker onChange={onChange} />
                 </Form.Item>
               </Col>
-            </Row>
-          )}
+            )}
+          </Row>
         </Form>
       </Modal>
       <Modal
@@ -395,12 +448,7 @@ export const User = () => {
         onCancel={handleCancelDelete}
       >
         <Alert
-          message={
-            <p>
-              Bạn có chắc chắn muốn xóa người dùng "<b>{userSelected}</b>"
-              không?
-            </p>
-          }
+          message={<p>Bạn có chắc chắn muốn xóa người dùng không?</p>}
           type="error"
           showIcon
         />
