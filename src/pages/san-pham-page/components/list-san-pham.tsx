@@ -12,6 +12,7 @@ import {
 import {
   CameraOutlined,
   EyeOutlined,
+  FilterOutlined,
   MenuUnfoldOutlined,
   ShoppingCartOutlined,
   StopOutlined,
@@ -32,6 +33,9 @@ import {
   Rate,
   message,
   Upload,
+  Dropdown,
+  Space,
+  Form,
 } from "antd";
 import MenuItem from "antd/es/menu/MenuItem";
 import React, { useEffect, useState } from "react";
@@ -71,10 +75,12 @@ export const ListSanPham = () => {
   let titleSelect = searchParams.get("option") ?? "All";
   let titleFilter = searchParams.get("filter") ?? "";
   let titleSort = searchParams.get("sort") ?? "";
+  let titleFilterPrice = searchParams.get("filter_price") ?? "";
   const { data: dataProducts } = useProducts({
     option: titleSelect,
     filter: titleFilter,
     sort: titleSort,
+    filter_price: titleFilterPrice,
   });
   const [valueSelect, setValueSelect] = useState("Default sorting");
   const [showInforProduct, setShowInforProduct] = useState(false);
@@ -152,6 +158,47 @@ export const ListSanPham = () => {
   const handleCancel = () => {
     setIsModalVisible(false);
   };
+  const [form] = Form.useForm();
+
+  const handleFilter = () => {
+    const formData = form.getFieldsValue();
+    const filterPrice = `${formData.minPrice || ""}-${formData.maxPrice || ""}`;
+    searchParams.set("filter_price", filterPrice);
+    setSearchParams(searchParams);
+  };
+  const dropdownMenu = (
+    <div
+      style={{
+        padding: "10px",
+        width: "250px",
+        backgroundColor: "#f7f9fc", // Màu nền sáng
+        border: "1px solid #d9d9d9", // Đường viền nhẹ
+        borderRadius: "8px", // Bo góc
+        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)", // Hiệu ứng đổ bóng
+      }}
+    >
+      <Form form={form} layout="vertical">
+        <Form.Item name="minPrice" label="Min Price">
+          <Input type="number" placeholder="Enter Min Price" />
+        </Form.Item>
+        <Form.Item name="maxPrice" label="Max Price">
+          <Input type="number" placeholder="Enter Max Price" />
+        </Form.Item>
+        <Space>
+          <Button type="primary" onClick={handleFilter}>
+            Apply
+          </Button>
+          <Button
+            onClick={() => {
+              form.resetFields();
+            }}
+          >
+            Reset
+          </Button>
+        </Space>
+      </Form>
+    </div>
+  );
   return (
     <>
       <div style={{ padding: "20px" }}>
@@ -216,18 +263,35 @@ export const ListSanPham = () => {
                     </Col>
                   </Row>
                 </Col>
-                <Col push={10}>
-                  <Select
-                    defaultValue="option1"
-                    style={{ width: 150 }}
-                    onChange={handleChange}
-                    value={valueSelect}
+                <Col push={9} style={{ marginRight: 10 }}>
+                  <Dropdown
+                    overlay={dropdownMenu}
+                    trigger={["click"]}
+                    placement="bottomCenter"
                   >
-                    <Option value="option1">Default sorting</Option>
-                    <Option value="option2">Sort by name</Option>
-                    <Option value="option3">Sort by price: low to high</Option>
-                    <Option value="option4">Sort by price: high to low</Option>
-                  </Select>
+                    <Button>
+                      <FilterOutlined />
+                    </Button>
+                  </Dropdown>
+                </Col>
+                <Col push={9}>
+                  <Row>
+                    <Select
+                      defaultValue="option1"
+                      style={{ width: 150 }}
+                      onChange={handleChange}
+                      value={valueSelect}
+                    >
+                      <Option value="option1">Default sorting</Option>
+                      <Option value="option2">Sort by name</Option>
+                      <Option value="option3">
+                        Sort by price: low to high
+                      </Option>
+                      <Option value="option4">
+                        Sort by price: high to low
+                      </Option>
+                    </Select>
+                  </Row>
                 </Col>
               </Row>
               <Row
